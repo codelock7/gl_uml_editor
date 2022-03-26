@@ -32,6 +32,15 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
+        point.cpp
+        point.h
+        size.cpp
+        size.h
+        rect.h
+        plainrect.cpp
+        plainrect.h
+        points.cpp
+        points.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -3,11 +3,28 @@
 #include <QMatrix4x4>
 #include <cmath>
 #include <QMouseEvent>
+#include "point.h"
+#include "rect.h"
+#include "size.h"
+#include "plainrect.h"
+#include <type_traits>
+
+static_assert(std::is_same_v<GLfloat, float>);
+static_assert(std::is_same_v<GLint, int>);
+
+template<typename T>
+Point toPoint(const T& source) {
+    Point p {
+        static_cast<float>(source.x()),
+        static_cast<float>(source.y())
+    };
+    return p;
+}
 
 struct MainShaderProgram {
     QString vertShaderPath;
     QString fragShaderPath;
-    GLint aColor;
+    int aColor;
     QMatrix4x4 matrix;
     QMatrix4x4 modelViewMatrix;
 };
@@ -151,15 +168,14 @@ void MainWindow::mouseMoveEvent(QMouseEvent* e) {
     if (hasSelection()) {
         const Point mousePos = toPoint(e->pos());
         shift(mSelectedRect, mousePos - gPrevPos);
-        if (findIntersection(mPoints, mSelectedRect) != mPoints.getInvalidId())
-//        if (auto it = findIntersection(mRects.begin(), mRects.end(), mSelectedRect);
-//                it != mRects.end()) {
+        if (const size_t id = findIntersection(mPoints, mSelectedRect);
+                id != mPoints.getInvalidIndex()) {
             qDebug("Intersect");
-//            if (mSelectedRect < it) {
-//                std::swap(*mSelectedRect, *it);
-//                mSelectedRect = it;
+//            if (mSelectedRect < id) {
+//                mPoints.swap(mSelectedRect, id)
+//                mSelectedRect = id;
 //            }
-//        }
+        }
         gPrevPos = mousePos;
         update();
     }
@@ -186,7 +202,7 @@ size_t MainWindow::findBoundRect(Points& points, Point mousePos)
             return i;
         }
     }
-    return points.getInvalidId();
+    return points.getInvalidIndex();
 }
 
 size_t MainWindow::findIntersection(Points& points, size_t rectId)
@@ -203,5 +219,5 @@ size_t MainWindow::findIntersection(Points& points, size_t rectId)
         assert(i % componentCount == 0);
         return i;
     }
-    return points.getInvalidId();
+    return points.getInvalidIndex();
 }
